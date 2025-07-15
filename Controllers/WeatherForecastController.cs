@@ -39,7 +39,7 @@ public class WeatherForecastController : ControllerBase
     public IActionResult GetNew()
     {
         int x=_dbContext.Users.Count();
-        _dbContext.Users.Add(new global::User(){Id=x,Name="new user"});
+        _dbContext.Users.Add(new global::User(){Name="new user"});
         _dbContext.SaveChanges();
         return Ok($"{x}");
     }
