@@ -1,3 +1,4 @@
+using AspForDocker.AspDbContext;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AspForDocker.Controllers;
@@ -12,16 +13,18 @@ public class WeatherForecastController : ControllerBase
     };
 
     private readonly ILogger<WeatherForecastController> _logger;
+    private readonly AppDbContext _dbContext;
 
-    public WeatherForecastController(ILogger<WeatherForecastController> logger)
+    public WeatherForecastController(ILogger<WeatherForecastController> logger, AppDbContext dbContext)
     {
         _logger = logger;
+        _dbContext = dbContext;
     }
 
     [HttpGet(Name = "GetWeatherForecast")]
     public IEnumerable<WeatherForecast> Get()
     {
-        return Enumerable.Range(1, 5).Select(index => new WeatherForecast
+        return Enumerable.Range(1, 2).Select(index => new WeatherForecast
         {
             Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
             TemperatureC = Random.Shared.Next(-20, 55),
@@ -29,4 +32,15 @@ public class WeatherForecastController : ControllerBase
         })
         .ToArray();
     }
+
+    [HttpGet(Name = "new")]
+    [Route("new")]
+    public IActionResult GetNew()
+    {
+        int x=_dbContext.Users.Count();
+        _dbContext.Users.Add(new global::User(){Id=x,Name="new user"});
+        _dbContext.SaveChanges();
+        return Ok($"{x}");
+    }
 }
+
