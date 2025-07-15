@@ -7,6 +7,10 @@ WORKDIR /app
 COPY *.csproj ./
 RUN dotnet restore
 
+
+RUN dotnet tool install --global dotnet-ef
+ENV PATH="${PATH}:/root/.dotnet/tools"
+
 COPY . ./
 
 # Expose port 80 for the app
@@ -14,3 +18,5 @@ EXPOSE 80
 
 # Run with dotnet watch for hot reload
 ENTRYPOINT ["dotnet", "watch", "run", "--urls=http://+:80"]
+
+
