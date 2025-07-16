@@ -5,12 +5,24 @@ services:
       target: dev  # match the Dockerfile target name
     ports:
       - "5000:80"
-    volumes:
-      - .:/app
+    # volumes:
+    #   - .:/app
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=aspdb;Username=aspuser;Password=asppass
+    depends_on:
+      - db
+      - migrator
 
+  migrator:
+    build:
+      context: .
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=aspdb;Username=aspuser;Password=asppass
+    depends_on:
+      - db
+    command: ["dotnet", "Migrator/bin/Release/net8.0/Migrator.dll"]
 
   db:
     image: postgres:16
