@@ -22,23 +22,28 @@
 
 # Build the migrator + app
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-WORKDIR /src
+WORKDIR /app
 
-COPY . .
-RUN dotnet restore "./src/AspForDocker.csproj"
-RUN dotnet publish "./src/AspForDocker.csproj" -c Release -o /out/app
-RUN dotnet publish "./Migrator/Migrator.csproj" -c Release -o /out/migrator
+COPY *.sln ./
+COPY src/ ./src/
+COPY Migrator/ ./Migrator/
 
-# Runtime image
-FROM mcr.microsoft.com/dotnet/aspnet:8.0
+RUN dotnet restore
+RUN dotnet publish Migrator/Migrator.csproj -c Release -o /out/migrator
+RUN dotnet publish src/AspForDocker.csproj -c Release -o /out/web
+
+# Final runtime stage
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
 
 # Copy app and migrator
-COPY --from=build /out/app ./
-COPY --from=build /out/migrator ./migrator
+
+COPY --from=build /out/migrator ./migrator/
+COPY --from=build /out/web ./web/
 
 ENV ASPNETCORE_URLS=http://+:80
 
 # Entrypoint script that runs migrator first, then starts app
-CMD dotnet ./migrator/Migrator.dll && dotnet AspForDocker.dll
+CMD bash -c "dotnet ./migrator/Migrator.dll && dotnet ./web/AspForDocker.dll"
+
 

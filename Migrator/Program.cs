@@ -4,16 +4,33 @@ using Microsoft.EntityFrameworkCore;
 using AspForDocker.AspDbContext;
 using Microsoft.Extensions.Configuration;
 
-var host = Host.CreateDefaultBuilder(args)
+Console.WriteLine("🚀 Migrator starting...");
+
+var host = Host.CreateDefaultBuilder().ConfigureAppConfiguration((ctx, config) =>
+    {
+        config.AddEnvironmentVariables();
+    })
     .ConfigureServices((ctx, services) =>
     {
-        services.AddDbContext<AppDbContext>(options =>
-            options.UseNpgsql(ctx.Configuration.GetConnectionString("DefaultConnection")));
+        var conn = ctx.Configuration.GetConnectionString("DefaultConnection");
+
+        if (string.IsNullOrWhiteSpace(conn))
+        {
+            Console.WriteLine("❌ Connection string is empty or null.");
+            Environment.Exit(1);  // stop early with clean exit
+        }
+        else
+        {
+            Console.WriteLine($"✅ Using connection string: {conn}");
+        }
+        Console.WriteLine("Using DB: " + conn);
+
+        services.AddDbContext<AppDbContext>(opts => opts.UseNpgsql(conn));
     })
     .Build();
 
 using var scope = host.Services.CreateScope();
 var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-Console.WriteLine("Applying migrations...");
 db.Database.Migrate();
-Console.WriteLine("Done.");
+
+Console.WriteLine("✅ Migrations complete.");

@@ -1,0 +1,11 @@
+FROM mcr.microsoft.com/dotnet/sdk:8.0
+
+WORKDIR /app
+
+COPY *.sln ./
+COPY src/ ./src/
+COPY Migrator/ ./Migrator/
+
+EXPOSE 5000
+
+CMD ["dotnet", "watch", "--project", "src/AspForDocker.csproj", "run", "--urls=http://+:5000"]
