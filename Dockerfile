@@ -14,6 +14,7 @@
 # COPY . ./
 
 # # Expose port 80 for the app
+# ENV ASPNETCORE_URLS=http://+:80
 # EXPOSE 80
 
 # # Run with dotnet watch for hot reload

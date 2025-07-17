@@ -1,5 +1,6 @@
 using AspForDocker.AspDbContext;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace AspForDocker.Controllers;
 
@@ -36,12 +37,13 @@ public class WeatherForecastController : ControllerBase
 
     [HttpGet(Name = "new")]
     [Route("new")]
-    public IActionResult GetNew()
+    public async Task<IActionResult> GetNew()
     {
-        int x=_dbContext.Users.Count();
-        _dbContext.Users.Add(new global::User(){Name="new user"});
-        _dbContext.SaveChanges();
-        return Ok($"{x}");
+        int x = _dbContext.Users.Count();
+        await _dbContext.Users.AddAsync(new global::User() { Name = $"user {x+1}" });
+        await _dbContext.SaveChangesAsync();
+        List<User> users = await _dbContext.Users.ToListAsync();
+        return Ok(users);
     }
 }
 
